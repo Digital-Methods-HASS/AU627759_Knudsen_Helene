@@ -1,0 +1,77 @@
+---
+title: "Map1"
+output: html_document
+date: "2022-12-09"
+---
+
+#Pakages
+```{r}
+library(tidyverse)
+library(leaflet)
+library(mapproj)
+library(maps)
+library(dplyr)
+library(crosstalk)
+```
+
+# Dataset: https://www.kaggle.com/datasets/rtatman/historical-american-lynching
+
+#Loading the dataset, where Simone Broni had used a lot of time to add latitude and longtitude but decided to do another project. So credit is given to her to add this to the dataset.
+```{r}
+Lynching_data <- read_csv("data/Lynching-Data-Simone-Fixed-xlsx (1).csv")
+States <- map_data("state")
+```
+
+#The first problem found is that Latitude for some reason was a charcter value instead of numeric. So to fix it I used this peace of code:
+### This code was inspired by https://stackoverflow.com/questions/2288485/how-to-convert-a-data-frame-column-to-numeric-type
+```{r}
+Lynching_data <- transform(Lynching_data, Latitude = as.numeric(Latitude))
+```
+
+#Tried this code to make the Latitude numeric and it did not work.
+```{r}
+Lynching_data$Latitude <- as.numeric(Lynching_data$Latitude) 
+Lynching_data$Longitude <- as.numeric(Lynching_data$Longitude)
+```
+
+#Hereafter I used the map exercise thought to us in class, to create the following map with clusters and added information to these clusters.
+##In the clusters I chose to add the information: Statem Year, Offense, Race and Victim(The name if known)
+```{r}
+esri <- grep("^Esri", providers, value = TRUE)
+```
+
+
+```{r}
+Lynching_map <- 
+  leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng = Lynching_data$Longitude, 
+             lat = Lynching_data$Latitude,
+             popup = paste(Lynching_data$State,'<br>',  Lynching_data$Year,'<br>', Lynching_data$Offense,'<br>', Lynching_data$Race,'<br>',Lynching_data$Victim),
+             clusterOptions = markerClusterOptions())
+```
+```{r}
+Lynching_map
+```
+#This map can now easly be navigated in, and you can get the individual lynching victims information. There is the option to add more information, but I did not se the relevans in doing so. 
+##As will be discussed in the exam project the map also shows the imbalance of the dataset.
+
+
+#I then decided to try making a map with a slider.
+## The slider could  have helped with an analysis for specifik timeperiods, but there was sadly not enough space due to the charecter limit.  Here I got help from Asmus, that had found a solution from this stackocerflow: https://stackoverflow.com/questions/62849300/r-leaflet-add-a-range-slider-to-filter-markers-without-shiny
+##I would also have trie to add a couter of the datapoints, that would change with how you moved the slider.
+
+```{r maak shared data object}
+shared_data <- SharedData$new(Lynching_data)
+```
+
+```{r genereer output}
+filter_slider("Lynching_data$Year", "Date", shared_data, ~Lynching_data$Year, width = "100%")
+leaflet(shared_data, width = "100%", height = 800) %>%
+  leaflet::addTiles() %>%
+  leaflet::addMarkers() 
+```
+
+##The slider will only show up in the knitted htlm file.
+
+
