@@ -1,0 +1,66 @@
+---
+title: "Visualization"
+output: html_document
+date: "2022-12-12"
+---
+# Dataset: https://www.kaggle.com/datasets/rtatman/historical-american-lynching
+
+```{r}
+library(tidyverse)
+library(leaflet)
+library(dplyr)
+library(plotly)
+library(ggplot2)
+```
+
+```{r}
+Lynching_data <- read_csv("data/Lynching-Data-Simone-Fixed-xlsx (1).csv")
+```
+
+#To sort the data:
+## First I had to count how many got linched by race each of the datasets years. And this was done by using the count() function from the dplyr library.I was shown this way to do it by Adela in Hackyhours.
+```{r}
+Vis=data.frame(Lynching_data %>% 
+  group_by(Year, Race) %>% 
+  count())
+```
+
+## I then wanted to create my first visulization, and it was done with the help of this guide: https://r-graph-gallery.com/136-stacked-area-chart.html 
+## Here I chose to show the killings by race through a geom_area() graph.
+
+```{r}
+vis_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race))+
+         geom_area()+
+  labs(title = "Killed by race", 
+       y= "Deaths per year",
+       x= "Year")
+ggplotly(vis_1)
+```
+### This graph is not as easy to read as I had hoped it was. So I decided to create a line graph insted.
+
+#Line praph
+## This line graph was created with the help of https://r-graph-gallery.com/line-chart-several-groups-ggplot2.html
+### The n value is the number of people killed in that year. 
+```{r}
+vis_1_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race, color=Race))+
+         geom_line()+
+  labs(title = "Killed by race", 
+       y= "Deaths per year",
+       x= "Year")
+ggplotly(vis_1_1)
+```
+#Another usefull thing about this grapph is that you can hover over the year and get the precise number of deaths and year. Which is usefull as the graph is also not easy to read, by just looking at it. I could not figure out how to stretch the x and y-axes to make it easier to read. That is probebly the biggest flaw with this graph.
+
+## The split of the graph is from the homicide homework assignment:
+```{r}
+vis_1_1_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race, color=Race))+
+         geom_line()+
+  labs(title = "Killed by race", 
+       y= "Deaths per year",
+       x= "Year")+
+      facet_wrap(~ Race, ncol = 1)
+vis_1_1_1
+```
+##This is usefull to show how big the difference was between the race of the people that got lynched. And look at the evolution of people killed through time, but more on that in the final project.
+
+
