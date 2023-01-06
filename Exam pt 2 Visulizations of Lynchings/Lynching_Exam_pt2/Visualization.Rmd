@@ -17,8 +17,9 @@ library(ggplot2)
 Lynching_data <- read_csv("data/Lynching-Data-Simone-Fixed-xlsx (1).csv")
 ```
 
-#To sort the data:
+# To sort the data:
 ## First I had to count how many got linched by race each of the datasets years. And this was done by using the count() function from the dplyr library.I was shown this way to do it by Adela in Hackyhours.
+
 ```{r}
 Vis=data.frame(Lynching_data %>% 
   group_by(Year, Race) %>% 
@@ -37,10 +38,13 @@ vis_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race))+
 ggplotly(vis_1)
 ```
 ### This graph is not as easy to read as I had hoped it was. So I decided to create a line graph insted.
+### And for some reason I do not know why, the ggplottly will only show 1 year, and whould not be fixed no matter what I tried.
 
-#Line praph
+
+# Line praph
 ## This line graph was created with the help of https://r-graph-gallery.com/line-chart-several-groups-ggplot2.html
 ### The n value is the number of people killed in that year. 
+
 ```{r}
 vis_1_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race, color=Race))+
          geom_line()+
@@ -49,7 +53,7 @@ vis_1_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race, color=Race))+
        x= "Year")
 ggplotly(vis_1_1)
 ```
-#Another usefull thing about this grapph is that you can hover over the year and get the precise number of deaths and year. Which is usefull as the graph is also not easy to read, by just looking at it. I could not figure out how to stretch the x and y-axes to make it easier to read. That is probebly the biggest flaw with this graph.
+## Another usefull thing about this grapph is that you can hover over the year and get the precise number of deaths and year. Which is usefull as the graph is also not easy to read, by just looking at it. I could not figure out how to stretch the x and y-axes to make it easier to read. That is probebly the biggest flaw with this graph.
 
 ## The split of the graph is from the homicide homework assignment:
 ```{r}
@@ -59,8 +63,77 @@ vis_1_1_1 <- ggplot(Vis, aes(x=Year,y=n, fill=Race, color=Race))+
        y= "Deaths per year",
        x= "Year")+
       facet_wrap(~ Race, ncol = 1)
-vis_1_1_1
+ggplotly(vis_1_1_1)
 ```
+
 ##This is usefull to show how big the difference was between the race of the people that got lynched. And look at the evolution of people killed through time, but more on that in the final project.
 
 
+
+# Reasons for the lynchings
+## This was done by using this guide: 
+```{r}
+Vis_Offense=data.frame(Lynching_data %>% 
+  group_by(Offense, Race) %>% 
+  count())
+```
+
+```{r}
+library(forcats)
+```
+
+
+```{r}
+Vis_Offense %>% 
+  ggplot( aes(x=n, y=Offense, fill = Race)) +
+    geom_bar(stat="identity", fill="#f68060", alpha=.5, width=.7) +
+    xlab("") +
+  labs(title = "Offence reasons, all races.", 
+       y= "Reason for lynching",
+       x= "Number of lynchings")+
+    theme_bw()
+```
+
+## This is clearly not ledgeble, so I tried to filter the data. 
+## The first one here is a try to filter it so it only shows black victims, this was done with the help of this guide: https://www.youtube.com/watch?v=sDoGnfL0vzg&ab_channel=MikeJonasEconometrics
+
+```{r}
+Vis_Offense1=filter(Vis_Offense, Race!='Wht')
+Vis_Offense1=filter(Vis_Offense1, Race!='Unk')
+Vis_Offense1=filter(Vis_Offense1, Race!='Other')
+```
+
+```{r}
+Vis_Offense1 %>% 
+  ggplot( aes(x=n, y=Offense, fill = Race)) +
+    geom_bar(stat="identity", fill="#f68060", alpha=.5, width=.7) +
+    xlab("") +
+  labs(title = "Offence reasons for black victims.", 
+       y= "Reason for lynching",
+       x= "Number of lynchings")+
+    theme_bw()
+```
+
+## This shows there are simply to many datapoints still.
+## What could have been done  to fix this? Adding a minimum value or a max, to filter out some of the many options. The problem here is ofcouse that you will lose some of the datapoints. If you look at the data you will 
+
+#And made the same with the other major victim group, white people.
+
+```{r}
+Vis_Offense2=filter(Vis_Offense, Race!='Blk')
+Vis_Offense2=filter(Vis_Offense2, Race!='Unk')
+Vis_Offense2=filter(Vis_Offense2, Race!='Other')
+```
+
+```{r}
+Vis_Offense2 %>% 
+  ggplot( aes(x=n, y=Offense, fill = Race)) +
+    geom_bar(stat="identity", fill="#f68060", alpha=.5, width=.7) +
+    xlab("") +
+  labs(title = "Offence reasons for white victims.", 
+       y= "Reason for lynching",
+       x= "Number of lynchings")+
+    theme_bw()
+```
+
+## This is readeble in the big window. And shows ecatly what I wanted it to. The only problem is that I could not get it to add more numbers on the x-axis.
